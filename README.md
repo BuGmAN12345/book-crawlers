@@ -1,5 +1,9 @@
 # book-crawlers
 ## 中文版：
+版本更新：
+1.1：
+更改了request请求的函数，解决了程序出错时socket未关闭的问题，并增加了一个host_agent选项，用于解决当主机网卡使用代理时ssl检验不通过的问题，当
+需要使用主机代理时需要修改此全局变量为True
 
 情况一：
 
@@ -44,6 +48,10 @@
 
 
 ## English version
+Version update:
+1.1：
+Changed the function of the request request, solved the problem of socket not being closed when the program encounters an error, and added a host_magent option to solve the problem of SSL verification not passing when the host network card uses a proxy
+When using a host agent, it is necessary to modify this global variable to True
 
 Scenario 1:
 
