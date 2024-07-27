@@ -12,7 +12,7 @@
 更改了整体框架，使用了类方法，可适用于下载35小说网的所有书籍。在拉取代码后，只需要修改host_agent和basic_path这两个全局变量即可。  
 其中host_agent见1.1，basic_path为存放书籍的路径。  
 如果需要使用代理（经过验证，35小说网并不需要使用代理），使用  
-`python get_book.py True`  
+`python 35_get_book.py True`  
 即可，如果不需要直接不传入参数或者传入False即可。默认使用代理池大小为30，线程数为128，可在main位置自行调整  
 使用该程序时，先输入需要爬取的书籍关键词，例如:斗罗大陆  
 程序返回所有包含关键词的所有书名，作者，状态以及编号，输入最后选定书籍的编号并确认（可以直接回车表示选定第一个书籍，再次回车表示确认）  
@@ -75,7 +75,7 @@ When using a host agent, it is necessary to modify this global variable to True
 Changed the overall framework and used class methods, which can be applied to download all books from 35 Novel Network. After pulling the code, you only need to modify the two global variables host_magent and basic_path.
 Among them, host_magent is shown in 1.1, and basic_path is the path to store books.  
 If you need to use a proxy (after verification, 35 Novel Network does not require the use of a proxy), use  
-`python get_book.py True`  
+`python 35_get_book.py True`  
 Okay, if you don't need to pass in any parameters directly or pass in False. The default proxy pool size is 30 and the number of threads is 128, which can be adjusted at the main position  
 When using this program, first enter the keywords of the books that need to be crawled, such as "斗罗大陆"  
 The program returns all book titles, authors, statuses, and numbers containing keywords. Enter the last selected book number and confirm (you can directly press enter to select the first book, and press enter again to confirm)  
