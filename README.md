@@ -9,7 +9,8 @@
 
 2.1：
 
-更改了整体框架，使用了类方法，可适用于下载35小说网的所有书籍。在拉取代码后，只需要修改host_agent和basic_path这两个全局变量即可。  
+更改了整体框架，使用了类方法，可适用于下载35小说网的所有书籍。新程序包含老程序的所有内容，更名为`35_get_book.py`  
+在拉取代码后，只需要修改host_agent和basic_path这两个全局变量即可。  
 其中host_agent见1.1，basic_path为存放书籍的路径。  
 如果需要使用代理（经过验证，35小说网并不需要使用代理），使用  
 `python 35_get_book.py True`  
@@ -72,7 +73,8 @@ Changed the function of the request request, solved the problem of socket not be
 When using a host agent, it is necessary to modify this global variable to True
 
 2.1：
-Changed the overall framework and used class methods, which can be applied to download all books from 35 Novel Network. After pulling the code, you only need to modify the two global variables host_magent and basic_path.
+Changed the overall framework and used class methods, which can be applied to download all books from 35 Novel Network. The new program contains all the content of the old program and has been renamed as `35_get_book.py`  
+After pulling the code, you only need to modify the two global variables host_magent and basic_path.
 Among them, host_magent is shown in 1.1, and basic_path is the path to store books.  
 If you need to use a proxy (after verification, 35 Novel Network does not require the use of a proxy), use  
 `python 35_get_book.py True`  
