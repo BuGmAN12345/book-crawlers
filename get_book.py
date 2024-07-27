@@ -19,6 +19,7 @@ basic_path=r"C:\Users\34196\Desktop\script library\books"
 _workfile_path=basic_path+r"\workfile"
 workfile_path=_workfile_path+r"\\"
 
+host_agent=False #默认不使用主机代理
 
 sleep_time=0  #记录网络中断次数
 
@@ -50,24 +51,28 @@ def get_Proxies(num):  #获取代理个数
         ip_list=["http://"+ip.strip() for ip in ip_list]
     os.remove("http.txt")
     Proxies_Pool=ip_list[:num]
+
 def copy_and_delete(source_file, destination_file):  
         with open(workfile_path+source_file, 'r',encoding='utf-8') as source:
             content = source.read()       
         with open(basic_path+r"\\"+destination_file, 'a',encoding='utf-8') as destination:
             destination.write(content)
         os.remove(workfile_path+source_file)
+
 def integrate(nums):
     print("\nStart integrating……")
     book_txt_name=book_name+".txt"
     for i in range(nums):
         txt_name=book_name+"_"+str(i)+".txt"
         copy_and_delete(txt_name,book_txt_name)
+
 def writer(title, filename, target):
     text=get_contents(target)
     with open(workfile_path+filename, 'a', encoding='utf-8') as f:
         f.write(title + '\n')
         f.writelines(text)
         f.write('\n\n\n\n')
+
 def get_download_url(target,server,title,urls):  
     req = requests.get(url = target,headers = headers)
     if req.status_code != 200:
@@ -88,42 +93,47 @@ def get_download_url(target,server,title,urls):
         path+=".html"  #加入_1'''
         urls.append(path)#将链接放入urls列表
     return nums
+
 def proxies_request(target):  #运用代理下的get请求处理
     global sleep_time
     random_proxies=random.randint(0,len(Proxies_Pool)-1)
     request_time=0
     success=False
+    tmp=not host_agent #即默认使用SSL检验
     while success==False:        
-        try:
-            req = requests.get(url = target,headers = headers,proxies = {"http":Proxies_Pool[random_proxies]},timeout=3)
-            success=True
-        except requests.exceptions.Timeout:  #如果代理不可用
-            del Proxies_Pool[random_proxies]
-            random_proxies=random.randint(0,len(Proxies_Pool)-1)
-    while req.status_code != 200 and request_time < 5:  #如果代理没问题但网页访问出错
-            time.sleep(1)
-            sleep_time+=1
-            request_time+=1
-            req = requests.get(url = target,headers = headers,proxies = {"http":Proxies_Pool[random_proxies]},timeout=3)
-    if request_time>=5:
-        print("-"*20,"network erro!","-"*20)
-        sys.exit()
-    else:
-        return req
+        while True:
+            try:
+                with requests.get(url=target,headers=headers,proxies={"http":Proxies_Pool[random_proxies]},timeout=3,verify=tmp) as req:
+                    success=True
+                    if req.status_code==200:
+                        return req
+                    elif request_time>=5:
+                        print("-"*20,"network erro!","-"*20)
+                        sys.exit()
+                    else:
+                        time.sleep(1)
+                request_time+=1
+                sleep_time+=1
+            except requests.exceptions.Timeout:  #如果代理不可用
+                del Proxies_Pool[random_proxies]
+                random_proxies=random.randint(0,len(Proxies_Pool)-1)
+
 def request(target):
     global sleep_time
     request_time=0
-    req = requests.get(url = target,headers = headers)
-    while req.status_code != 200 and request_time < 5:
-            time.sleep(1)
-            sleep_time+=1
-            request_time+=1
-            req = requests.get(url = target,headers = headers)
-    if request_time>=5:
-        print("-"*20,"network erro!","-"*20)
-        sys.exit()
-    else:
-        return req
+    tmp=not host_agent #即默认使用SSL检验
+    while True:
+        with requests.get(url = target,headers = headers,verify=tmp) as req:
+            if req.status_code==200:
+                return req
+            elif request_time>=5:
+                print("-"*20,"network erro!","-"*20)
+                sys.exit()
+            else:
+                time.sleep(1)
+        request_time+=1
+        sleep_time+=1
+
 def get_contents(target):
     if whether_Proxies==True:
         req=proxies_request(target)
