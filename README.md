@@ -21,6 +21,21 @@
 新增依赖库：  
 `pip install prettytable`  
 
+2.2：
+
+新增了输出.epub格式电子书的功能，电子书包括封面+文字封面(书名+作者)+目录+正文部分内容，格式完全与35小说网在线状况相同，并屏蔽了广告。
+新增了参数功能，下面是参数帮助：（使用`python 35_get_book.py -h`或`python 35_get_book.py --help`即可获取）  
+```
+usage: 35_get_book.py [-h] [-noepub] [-proxies] [--pps PPS] [--tn TN]  
+This is a teaching interface    
+options:  
+  -h, --help  show this help message and exit  
+  -noepub     Not outputting books in EPUB format(output in txt format)  
+  -proxies    Use proxy to crawl books(Default not to use proxy)  
+  --pps PPS   input a int number as the size of proxies pool(Default is 30)  
+  --tn TN     input a int number as the number of threads(Default is 168)
+```
+
 <br>
 
 情况一：
@@ -84,6 +99,20 @@ The program returns all book titles, authors, statuses, and numbers containing k
 Note: When the search keyword does not exist, the program will exit directly. When there is only one corresponding book for the search keyword, it will be downloaded directly
 Add dependency library:  
 `pip install prettytable` 
+
+2.2：
+Added the function of outputting. epub format e-books, which include cover+text cover (book title+author)+table of contents+main body content. The format is completely the same as the online status of 35 Novel Network, and advertisements are blocked.  
+Added parameter function, below is the parameter help：(using `python 35_get_book.py -h` or `python 35_get_book.py --help` can get it!)  
+```
+usage: 35_get_book.py [-h] [-noepub] [-proxies] [--pps PPS] [--tn TN]  
+This is a teaching interface  
+options:  
+  -h, --help  show this help message and exit  
+  -noepub     Not outputting books in EPUB format(output in txt format)  
+  -proxies    Use proxy to crawl books(Default not to use proxy)  
+  --pps PPS   input a int number as the size of proxies pool(Default is 30)  
+  --tn TN     input a int number as the number of threads(Default is 168)
+```
 
 Scenario 1:
 
