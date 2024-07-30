@@ -36,8 +36,11 @@ options:
   --tn TN     input a int number as the number of threads(Default is 168)
 ```
 
-<br>
+### 35_get_book.py
+可直接用于爬取35小说网上的所有书籍，并可以转化为epub格式，使用前仅需要提前更改15/16行的内容即可，具体详情请见上方2.1，2.2，输入参数后按照提示选择想要
+的书籍爬取即可，速度很快
 
+### get_book.py
 情况一：
 
 程序模板可以直接用于下载35小说网的请叫我鬼差大人小说，但在真正运用到本机下载前需要做如下修改：
@@ -114,6 +117,10 @@ options:
   --tn TN     input a int number as the number of threads(Default is 168)
 ```
 
+### 35_get_book.py  
+It can be directly used to crawl all books on the 35 Novel website and can be converted to EPUB format. Before use, only the content of lines 15/16 needs to be changed in advance. For specific details, please refer to sections 2.1 and 2.2 above. After entering the parameters, follow the prompts to select the desired content.Simply crawl the books and it's very fast
+
+### get_book.py  
 Scenario 1:
 
 The program template can be directly used to download 35 novels from the website. Please call me Ghost Adventure Adult Novel, but the following modifications need to be made before truly applying it to local downloads:
