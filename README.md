@@ -36,6 +36,39 @@ options:
   --tn TN     input a int number as the number of threads(Default is 168)
 ```
 
+3.1：
+
+新增了爬取顶点小说网的功能，同时开启了同时获取两个小说网相应章节搜索目录，并爬取的功能。注意，也新加入了几个依赖库：（值得注意的是，下面的这几个依赖库只有使用到dingdian小说时才需要配置）
+```
+import numpy as np
+import pytesseract
+from PIL import Image
+import cv2 as cv
+```
+为了更美观的显示出进度，新增了如下依赖库：
+```
+from rich.progress import Progress
+```
+需要注意的是，爬取顶点小说网需要选择登录方式，即注册或者直接登录，下面是帮助：
+```
+usage: get_book.py [-h] [-noepub] [-noproxies] [--pps PPS] [--tn TN] [--n35] [--dingdian] [--compuse] [--dlogin]
+
+This is a teaching interface
+
+options:
+  -h, --help  show this help message and exit
+  -noepub     Not outputting books in EPUB format(output in txt format)
+  -noproxies  Not using proxy to crawl books(Default not to use proxy)
+  --pps PPS   Input a int number as the size of proxies pool(Default is 30)
+  --tn TN     Input a int number as the number of threads(Default is 168)
+  --n35       Using only 35 Novel Network to crawl books
+  --dingdian  Using only DingDian Novel Network to crawl books
+  --compuse   Simultaneously use DingDian Novel Network and 35 Novel Network to obtain books for you to choose from
+  --dlogin    Log in directly through default accounts instead of registering a new account (note: there may be a risk
+              of account suspension)
+```
+为了防止配置环境过于复杂，可以使用`get_dependent.bat`来直接获取顶点小说依赖库外的其他所有依赖（因为pytesseract需要手动下载库并配置环境）
+
 ### 35_get_book.py
 可直接用于爬取35小说网上的所有书籍，并可以转化为epub格式，使用前仅需要提前更改15/16行的内容即可，具体详情请见上方2.1，2.2，输入参数后按照提示选择想要
 的书籍爬取即可，速度很快
@@ -86,11 +119,11 @@ options:
 ## English version
 Version update:
 
-1.1：
+1.1：  
 Changed the function of the request request, solved the problem of socket not being closed when the program encounters an error, and added a host_magent option to solve the problem of SSL verification not passing when the host network card uses a proxy
 When using a host agent, it is necessary to modify this global variable to True
 
-2.1：
+2.1：  
 Changed the overall framework and used class methods, which can be applied to download all books from 35 Novel Network. The new program contains all the content of the old program and has been renamed as `35_get_book.py`  
 After pulling the code, you only need to modify the two global variables host_magent and basic_path.
 Among them, host_magent is shown in 1.1, and basic_path is the path to store books.  
@@ -103,7 +136,7 @@ Note: When the search keyword does not exist, the program will exit directly. Wh
 Add dependency library:  
 `pip install prettytable` 
 
-2.2：
+2.2：  
 Added the function of outputting. epub format e-books, which include cover+text cover (book title+author)+table of contents+main body content. The format is completely the same as the online status of 35 Novel Network, and advertisements are blocked.  
 Added parameter function, below is the parameter help：(using `python 35_get_book.py -h` or `python 35_get_book.py --help` can get it!)  
 ```
@@ -116,6 +149,36 @@ options:
   --pps PPS   input a int number as the size of proxies pool(Default is 30)  
   --tn TN     input a int number as the number of threads(Default is 168)
 ```
+
+3.1：  
+Added the function of crawling vertex novel websites, and also enabled the function of simultaneously obtaining the corresponding chapter search directories of two novel websites and crawling them. Note that several dependency libraries have also been added: (It is worth noting that the following dependency libraries only need to be configured when using Dingdian novels)
+```
+import numpy as np
+import pytesseract
+from PIL import Image
+import cv2 as cv
+```
+In order to display progress more visually, the following dependency libraries have been added:
+```
+from rich.progress import Progress
+```
+It should be noted that crawling the vertex novel website requires selecting a login method, namely registration or direct login. Here is the help:
+```
+usage: get_book.py [-h] [-noepub] [-noproxies] [--pps PPS] [--tn TN] [--n35] [--dingdian] [--compuse] [--dlogin]
+This is a teaching interface
+options:
+-h, --help   show this help message and exit
+-noepub     Not outputting books in EPUB format(output in txt format)
+-noproxies  Not using proxy to crawl books(Default not to use proxy)
+--pps PPS   Input a int number as the size of proxies pool(Default is 30)
+--tn TN     Input a int number as the number of threads(Default is 168)
+--n35        Using only 35 Novel Network to crawl books
+--dingdian   Using only DingDian Novel Network to crawl books
+--compuse    Simultaneously use DingDian Novel Network and 35 Novel Network to obtain books for you to choose from
+--dlogin    Log in directly through default accounts instead of registering a new account (note: there may be a risk
+of account suspension)
+```
+To prevent the configuration environment from being too complex, you can use 'get_dependent. bat' to directly obtain all other dependencies outside the vertex novel dependency library (because pyEsseract requires manually downloading the library and configuring the environment)
 
 ### 35_get_book.py  
 It can be directly used to crawl all books on the 35 Novel website and can be converted to EPUB format. Before use, only the content of lines 15/16 needs to be changed in advance. For specific details, please refer to sections 2.1 and 2.2 above. After entering the parameters, follow the prompts to select the desired content.Simply crawl the books and it's very fast
