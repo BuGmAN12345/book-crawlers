@@ -13,7 +13,11 @@ import argparse
 import wget
 
 host_agent=False #默认不使用主机代理
-basic_path=r"C:\Users\34119\Desktop\script library\get_book_ul\books"  #存放书籍路径 
+##basic_path=r"C:\Users\34119\Desktop\script library\get_book_ul\books"  #存放书籍路径 
+current_path = os.path.realpath(__file__)
+directory_path = os.path.dirname(current_path)
+basic_path = directory_path + '\\books'
+os.makedirs(basic_path, exist_ok = True)
 
 class Proxies_Pool:
 	def __init__(self):
