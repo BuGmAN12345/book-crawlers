@@ -44,6 +44,53 @@ class Proxies_Pool:
 		print('Proxy pool initialization completed')
 		return self.proxies_pool
 
+class Header: #用于管理headers
+	def __init__(self,header=None):
+		self.headers=header
+
+	def perm_add_header(self,key,value): #添加永久header
+		if key in self.headers:
+			self.headers[key]=self.headers[key]+";"+value
+		else:
+			self.headers[key]=value
+
+	def temp_add_header(self,key,value):
+		if key in self.headers:
+			new_header=self.headers
+			new_header[key]=new_header[key]+";"+value
+			return new_header
+		else:
+			new_header=self.headers
+			new_header[key]=value
+			return new_header
+
+	def perm_replace_header(self,key,value):
+		if key in self.headers:
+			self.headers[key]=value
+		else:
+			print("You don't have an initial value for replacement")
+
+	def get_header(self):
+		return self.headers
+
+class User_Agent: #用于管理user_agent
+	def generate_user_agent(self,browser,os,browser_version):
+		if browser==0:
+			user_agent=f"Mozilla/5.0 ({os}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{browser_version} Safari/537.36"
+		elif browser==1:
+			user_agent=f"Mozilla/5.0 ({os}; rv:{browser_version}) Gecko/20100101 Firefox/{browser_version}"
+		else:
+			raise ValueError("Unsupported browser")   
+		return user_agent
+
+	def rgua(self): #随机生成一个user_agent
+		browser=random.randint(0,1)
+		os=['Windows NT 10.0; Win64; x64','Linux; Ubuntu 20.04; x86_64','Macintosh; Intel Mac OS X 10_15_7']
+		if browser==0:
+			return self.generate_user_agent(browser,os[random.randint(0,2)],'{}.0.0.0'.format(random.randint(100,128)))
+		if browser==1:
+			return self.generate_user_agent(browser,os[random.randint(0,2)],'{}.0'.format(random.randint(100,128)))
+
 class Get_Book:
 	def __init__(self,book_name,whether_epub,whether_Proxies,num,thread_num,proxy_pool=None): #是否使用代理，代理池大小
 		#print("book crawlers is opened……")
@@ -53,6 +100,8 @@ class Get_Book:
 			self.init_proxies(num)
 		else:
 			self.proxies_pool=proxy_pool
+		#self.headers=Header()
+		self.user_agent=User_Agent()
 		self.sleep_time=0 #网页出错次数
 		self.title=[]
 		self.urls=[]
@@ -75,35 +124,37 @@ class Get_Book:
 		while success==False:        
 			while True:
 				try:
+					ua=self.user_agent.rgua()
+					self.headers.perm_replace_header('User-Agent',ua)
 					if method==False:
-						with requests.get(url=target,headers=self.headers,proxies={"http":self.proxies_pool[random_proxies]},timeout=5,verify=tmp) as req:
+						with requests.get(url=target,headers=self.headers.get_header(),proxies={"http":self.proxies_pool[random_proxies]},timeout=5,verify=tmp) as req:
 							if req.history: #如果出现重定位，则自动修正url
 								self.server=req.url.rsplit('/', 1)[0]+'/'
 								print('server has changed into ',self.server)
 							success=True
 							if req.status_code==200:
 								return req
-							elif request_time>=5:
+							elif request_time>5:
 								print("in ",target)
 								print("-"*20,"network erro!","-"*20)
 								sys.exit()
 							else:
-								print("sleep! in",target)
-								time.sleep(2)
+								#print("sleep! in",target)
+								time.sleep(5)
 					else:
-						with requests.post(url=target,headers=self.headers,data=data,proxies={"http":self.proxies_pool[random_proxies]},timeout=5,verify=tmp) as req:
+						with requests.post(url=target,headers=self.headers.get_header(),data=data,proxies={"http":self.proxies_pool[random_proxies]},timeout=5,verify=tmp) as req:
 							if req.history: #如果出现重定位，则自动修正url
 								self.server=req.url.rsplit('/', 1)[0]+'/'
 								print('server has changed into ',self.server)
 							success=True
 							if req.status_code==200:
 								return req
-							elif request_time>=5:
+							elif request_time>5:
 								print("in ",target)
 								print("-"*20,"network erro!","-"*20)
 								sys.exit()
 							else:
-								time.sleep(2)
+								time.sleep(5)
 					request_time+=1
 					self.sleep_time+=1
 				except requests.exceptions.Timeout:  #如果代理不可用
@@ -114,32 +165,34 @@ class Get_Book:
 		request_time=0
 		tmp=not host_agent #即默认使用SSL检验
 		while True:
+			ua=self.user_agent.rgua()
+			self.headers.perm_replace_header('User-Agent',ua)
 			if method==False:
-				with requests.get(url=target,headers=self.headers,verify=tmp,timeout=5) as req:
+				with requests.get(url=target,headers=self.headers.get_header(),verify=tmp,timeout=5) as req:
 					if req.history: #如果出现重定位，则自动修正url
 						self.server=req.url.rsplit('/', 1)[0]+'/'
 						print('server has changed into ',self.server)
 					if req.status_code==200:
 						return req
-					elif request_time>=5:
+					elif request_time>5:
 						print("in ",target)
 						print("-"*20,"network erro!","-"*20)
 						sys.exit()
 					else:
-						time.sleep(2)
+						time.sleep(5)
 			else:
-				with requests.post(url=target,data=data,headers=self.headers,verify=tmp,timeout=5) as req:
+				with requests.post(url=target,data=data,headers=self.headers.get_header(),verify=tmp,timeout=5) as req:
 					if req.history: #如果出现重定位，则自动修正url
 						self.server=req.url.rsplit('/', 1)[0]+'/'
 						print('server has changed into ',self.server)
 					if req.status_code==200:
 						return req
-					elif request_time>=5:
+					elif request_time>5:
 						print("in ",target)
 						print("-"*20,"network erro!","-"*20)
 						sys.exit()
 					else:
-						time.sleep(2)
+						time.sleep(5)
 			request_time+=1
 			self.sleep_time+=1
 
@@ -279,7 +332,7 @@ class Get_Book_35(Get_Book):
 		#print("book crawlers is opened……")
 		super().__init__(book_name,whether_epub,whether_Proxies,num,thread_num,proxy_pool)
 		self.server="https://www.35wx.la"
-		self.headers={
+		tmp={
 		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0",
 		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
 		"Accept-Language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -292,6 +345,7 @@ class Get_Book_35(Get_Book):
 		"Te": "trailers",
 		"Connection": "close"
 		}  #目标的请求头，用来说明服务器使用的附加信息
+		self.headers=Header(tmp)
 		self.content_tag="ccc"
 		self.change_class="bottem2"
 		self.picture_tag='fmimg'	
@@ -466,7 +520,7 @@ class Get_Book_dingdian(Get_Book):
 	def __init__(self,book_name,whether_epub,whether_Proxies,whether_register,num,thread_num,proxy_pool=None): #是否使用代理，代理池大小
 		super().__init__(book_name,whether_epub,whether_Proxies,num,thread_num,proxy_pool)
 		self.server="https://www.txt263.com" #www.023zw.com
-		self.headers={
+		tmp={
 		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
 		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
 		"Accept-Language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -480,6 +534,7 @@ class Get_Book_dingdian(Get_Book):
 		"Te": "trailers",
 		"Connection": "close"
 		}  #目标的请求头，用来说明服务器使用的附加信息
+		self.headers=Header(tmp)
 		self.content_tag="word_read"
 		self.picture_tag='imgbox'
 		self.chapter_num=None
@@ -499,7 +554,35 @@ class Get_Book_dingdian(Get_Book):
 			sys.exit()
 		return response.headers
 
-	def ver_code(self,picture): #验证码识别
+	def im_show(self,pic_name,pic):
+		cv.imshow(pic_name,pic)
+		cv.waitKey(0)
+		cv.destroyAllWindows()
+
+	def pic_handle_spe(self,picture): #特异化图片处理
+		image=Images.open(picture)  # 替换为你的图片路径
+		image=image.convert('RGB')
+		pixels=image.load()  # 获取像素数据
+		for i in range(image.width):
+			for j in range(image.height):
+				r, g, b = pixels[i, j]  # 获取当前像素的 RGB 值
+				if (r + g + b) > 550 and b >= r and b >= g:
+					pixels[i, j]=(0,0,0)  # 满足条件，设为黑点
+				else:
+					pixels[i, j]=(255,255,255)  # 不满足条件，设为白点
+		image= np.array(image)
+		image=cv.resize(image, None, fx=3.0, fy=3.0, interpolation=cv.INTER_LINEAR)
+		binary=image[:, :, 0]
+		kernel = np.ones((5,5), dtype=np.uint8)
+		erode = cv.erode(binary, kernel, iterations=1) #30 30 4
+		kernel = np.ones((3,3), dtype=np.uint8)
+		dilate = cv.dilate(erode, kernel, iterations=1)
+		#self.im_show("binary",dilate)
+		test_message = Images.fromarray(dilate)
+		#test_message.save(basic_path+'\\output_image{}.tiff'.format(random.randint(1,10086)))
+		return test_message
+
+	def pic_handle_gen(self,picture): #图像处理
 		image=cv.imread(picture)
 		resized_image=cv.resize(image, None, fx=3.0, fy=3.0, interpolation=cv.INTER_LINEAR)
 		# 边缘保留滤波  去噪
@@ -508,26 +591,34 @@ class Get_Book_dingdian(Get_Book):
 		gray = cv.cvtColor(dst, cv.COLOR_BGR2GRAY)
 		# 二值化
 		ret, binary = cv.threshold(gray,0,255,cv.THRESH_BINARY_INV | cv.THRESH_OTSU)
+		#self.im_show("binary",binary)
 		# 形态学操作   腐蚀  膨胀
 		kernel = np.ones((5,5), dtype=np.uint8)
 		erode = cv.erode(binary, kernel, iterations=1) #30 30 4
 		kernel = np.ones((3,3), dtype=np.uint8)
 		dilate = cv.dilate(erode, kernel, iterations=1)
+		#self.im_show("dilate",dilate)
 		# 识别
 		test_message = Images.fromarray(dilate)
+		return test_message
+
+	def ver_code(self,picture,is_spe): #验证码识别
 		#test_message.save("test.png")
-		text=mypytesseract.image_to_string(test_message)  #,lang="eng"
+		if is_spe:
+			test_message=self.pic_handle_spe(picture)
+		else:
+			test_message=self.pic_handle_gen(picture)
+		text=mypytesseract.image_to_string(test_message,lang="eng")  #
 		text=''.join(filter(str.isalnum,text))
 		if len(text)==4:
 			return text
 		else:
 			return None
 
-	def get_code_cookie(self): #获取验证码内容以及对应的cookie
-		impath=basic_path+'\\code.jpg'
+	def get_code_cookie(self,i): #获取验证码内容以及对应的cookie
+		impath=basic_path+'\\code{}.jpg'.format(i)
 		cookie=None
-		new_header=self.headers
-		new_header["authority"]='www.txt263.com'
+		new_header=self.headers.temp_add_header("authority",'www.txt263.com')
 		for j in range(10): #设置最大循环次数
 			header=self.download_image(self.server+"/code.jpg?"+str(random.random()),impath,new_header) #50.118.164.201
 			try:
@@ -538,13 +629,58 @@ class Get_Book_dingdian(Get_Book):
 		else:
 			print("Can't get the cookie!")
 			sys.exit()
-		codes=self.ver_code(impath)
+		codes=self.ver_code(impath,False)
+		print("codes ",i," is ",codes)
+		#print(codes)
 		if codes==None: #验证码识别出错
 			os.remove(impath)
 			return (None,None)
 		#print(codes)
 		os.remove(impath)
 		return (cookie,codes)
+
+	def try_cookie_login(self,account,i): #尝试验证码是否正确 
+		cookie,codes=self.get_code_cookie(i)
+		if cookie==None:
+			return None
+		new_header=self.headers.temp_add_header('Cookie',cookie)
+		ranum=random.randint(0,5) #随机登陆一个账户
+		user_name=account[ranum][0]
+		md5_hash = hashlib.md5() #密码进行hash运算
+		md5_hash.update(account[ranum][1].encode('utf-8'))
+		md5_result = md5_hash.hexdigest()
+		user_pass=md5_result
+		data={"user_name":user_name,"user_pass":user_pass,"user_code":codes}
+		req=requests.post(self.server+"/qs_login_go.php",data=data,headers=new_header)
+		req.encoding='utf-8'
+		res_list=req.text.split('|')
+		if res_list[0]=="1":
+			return req
+		else:
+			return None
+
+	def try_cookie_register(self,i):
+		characters=string.ascii_letters  # 包含所有字母 (大写和小写)
+		user_name=''.join(random.choices(characters, k=14))
+		md5_hash=hashlib.md5() #密码进行hash运算
+		md5_hash.update(''.join(random.choices(characters, k=7)).encode('utf-8'))
+		md5_result=md5_hash.hexdigest()
+		user_pass=md5_result
+		mobile=str(phone_num_head[random.randint(0,len(phone_num_head)-1)])+str(random.randint(10000000, 99999999)) #生成电话号码
+		cookie,codes=self.get_code_cookie(i)
+		if cookie==None:
+			return None
+		new_header=self.headers.temp_add_header('Cookie',cookie)
+		data={"name":user_name,"mobile":mobile,"pass":user_pass,"pass2":user_pass,"code":}
+		req=requests.post(self.server+"/qs_register_go.php",data=data,headers=new_header)
+		req.encoding='utf-8'
+		res_list=req.text.split('|')
+		progress.update(task, advance=6.6)
+		if res_list[0]=="1" and 'Set-Cookie' not in req.headers:
+			return None
+		elif res_list[0]=="1":
+			progress.update(task,completed=100)
+			return req
 
 	def log_in(self):
 		print('The program is currently logging in……')
@@ -556,31 +692,23 @@ class Get_Book_dingdian(Get_Book):
 				("woshixiaozhao6","1234578_bruce")]  #初始账户密码
 		#super().request(self.server+"login.html")
 		req=None
-		with Progress() as progress:
-			task=progress.add_task("[cyan]Processing...", total=100)
-			for i in range(15): #设置最大循环次数 
-				cookie,codes=self.get_code_cookie()
-				if cookie==None:
-					continue
-				new_header=self.headers
-				new_header["Cookie"]=cookie
-				ranum=random.randint(0,5) #随机登陆一个账户
-				user_name=account[ranum][0]
-				md5_hash = hashlib.md5() #密码进行hash运算
-				md5_hash.update(account[ranum][1].encode('utf-8'))
-				md5_result = md5_hash.hexdigest()
-				user_pass=md5_result
-				data={"user_name":user_name,"user_pass":user_pass,"user_code":codes}
-				req=requests.post(self.server+"/qs_login_go.php",data=data,headers=new_header)
-				req.encoding='utf-8'
-				res_list=req.text.split('|')
-				progress.update(task, advance=6.6)
-				if res_list[0]=="1":
-					progress.update(task,completed=100)
-					break
-			else:
-				print("Verification code recognition module error")
-				return None
+		with ThreadPoolExecutor(max_workers=10) as executor:
+			all_task=[executor.submit(self.try_cookie_login,account,i) for i in range(30)]
+			with Progress() as progress:
+				task=progress.add_task("[cyan]Processing...", total=100)
+				for future in as_completed(all_task):
+					future.add_done_callback(super().call_back)
+					progress.update(task,advance=3.3)
+					result=future.result()
+					#print(result)
+					if result is not None: # 如果找到了req，立即终止线程池并返回req
+						progress.update(task,completed=100)
+						executor.shutdown(wait=False)  # 终止线程池
+						req=result
+						break
+				else:
+					print("Verification code recognition module error")
+					return None
 		tmplist=req.headers['Set-Cookie'].split(';')
 		cookie_login=tmplist[0]+";"+tmplist[2].split(',')[1]+";"+tmplist[4].split(',')[1]
 		return cookie_login
@@ -589,35 +717,23 @@ class Get_Book_dingdian(Get_Book):
 		print('The program is currently registering and logging in……')
 		phone_num_head=[133,142,144,146,148,149,153,180,181,189,130,131,132,141,143,145,155,156,185,186,134,135,136,137,138,139,140,147,150,151,152,157,158,159,182,183,187,188] #标准格式
 		req=None
-		characters=string.ascii_letters  # 包含所有字母 (大写和小写)
-		user_name=''.join(random.choices(characters, k=14))
-		md5_hash=hashlib.md5() #密码进行hash运算
-		md5_hash.update(''.join(random.choices(characters, k=7)).encode('utf-8'))
-		md5_result=md5_hash.hexdigest()
-		user_pass=md5_result
-		mobile=str(phone_num_head[random.randint(0,len(phone_num_head)-1)])+str(random.randint(10000000, 99999999)) #生成电话号码
-		with Progress() as progress:
-			task=progress.add_task("[cyan]Processing...", total=100)
-			for i in range(15): #设置最大循环次数
-				cookie,codes=self.get_code_cookie()
-				if codes==None:
-					continue
-				new_header=self.headers
-				new_header["Cookie"]=cookie
-				data={"name":user_name,"mobile":mobile,"pass":user_pass,"pass2":user_pass,"code":codes}
-				req=requests.post(self.server+"/qs_register_go.php",data=data,headers=new_header)
-				req.encoding='utf-8'
-				res_list=req.text.split('|')
-				progress.update(task, advance=6.6)
-				if res_list[0]=="1" and 'Set-Cookie' not in req.headers:
-					progress.update(task,completed=100)
+		with ThreadPoolExecutor(max_workers=10) as executor:
+			all_task=[executor.submit(self.try_cookie_register,i) for i in range(30)]
+			with Progress() as progress:
+				task=progress.add_task("[cyan]Processing...", total=100)
+				for future in as_completed(all_task):
+					future.add_done_callback(super().call_back)
+					progress.update(task,advance=3.3)
+					result=future.result()
+					#print(result)
+					if result is not None: # 如果找到了req，立即终止线程池并返回req
+						progress.update(task,completed=100)
+						executor.shutdown(wait=False)  # 终止线程池
+						req=result
+						break
+				else:
+					print("Verification code recognition module error")
 					return None
-				elif res_list[0]=="1":
-					progress.update(task,completed=100)
-					break
-			else:
-				print("Verification code recognition module error")
-				return None
 		tmplist=req.headers['Set-Cookie'].split(';')
 		header_login=tmplist[0]+";"+tmplist[2].split(',')[1]+";"+tmplist[4].split(',')[1]
 		return header_login
@@ -823,18 +939,19 @@ class Get_Book_dingdian(Get_Book):
 
 	def main_login(self): #负责获得cookie 
 		cookie=None
-		for i in range(3):
+		for i in range(1):
 			if self.whether_register==True:
 				cookie=self.register()
 			else:
 				cookie=self.log_in()
+			print(cookie)
 			if cookie!=None:
 				break
 		else:
 			print("It seems that the verification program has indeed encountered significant errors. Please contact the author!")
 			sys.exit()
 		print("logged in successfully……")
-		self.headers['Cookie']=cookie
+		self.headers.perm_add_header('Cookie',cookie)
 
 	def run(self):  #主程序
 		self.main_login()
@@ -966,3 +1083,15 @@ if __name__ == '__main__':
 		else:
 			get_book_name=input_bookname()
 			get_book_main(get_book_name,not args.noepub,not args.noproxies,not args.dlogin,args.pps,args.tn)
+	
+
+
+	'''mypytesseract=importlib.import_module('pytesseract') #导入需要的模块
+	Images=getattr(importlib.import_module('PIL'),'Image')
+	np=importlib.import_module('numpy')
+	cv=importlib.import_module('cv2')
+	book_dingdian=Get_Book_dingdian("斗罗大陆",False,False,True,1,1)
+	impath=basic_path+'\\code{}.jpg'.format(0)
+	new_header=book_dingdian.headers.temp_add_header("authority",'www.txt263.com')
+	book_dingdian.download_image(book_dingdian.server+"/code.jpg?"+str(random.random()),impath,new_header)
+	print(book_dingdian.ver_code(impath,True))'''
