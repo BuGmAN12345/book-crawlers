@@ -539,6 +539,8 @@ class Get_Book_dingdian(Get_Book):
 		self.picture_tag='imgbox'
 		self.chapter_num=None
 		self.whether_register=whether_register
+		model_small = r"ocr-captcha/output_small"
+		self.ocr_recognition_small = pipeline(Tasks.ocr_recognition, model=model_small)
 
 	def download_image(self,url,path,header=None): #重写加入headers
 		try:
@@ -608,8 +610,8 @@ class Get_Book_dingdian(Get_Book):
 			test_message=self.pic_handle_spe(picture)
 		else:
 			test_message=self.pic_handle_gen(picture)
-		text=mypytesseract.image_to_string(test_message,lang="eng")  #
-		text=''.join(filter(str.isalnum,text))
+		result = self.ocr_recognition_small(pict_path)
+		text=''.join(filter(str.isalnum,str(result['text'][0])))
 		if len(text)==4:
 			return text
 		else:
@@ -671,7 +673,7 @@ class Get_Book_dingdian(Get_Book):
 		if cookie==None:
 			return None
 		new_header=self.headers.temp_add_header('Cookie',cookie)
-		data={"name":user_name,"mobile":mobile,"pass":user_pass,"pass2":user_pass,"code":}
+		data={"name":user_name,"mobile":mobile,"pass":user_pass,"pass2":user_pass,"code":codes}
 		req=requests.post(self.server+"/qs_register_go.php",data=data,headers=new_header)
 		req.encoding='utf-8'
 		res_list=req.text.split('|')
