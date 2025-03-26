@@ -1,0 +1,71 @@
+{
+    "framework": "pytorch",
+    "task": "ocr-recognition",
+    "pipeline": {
+        "type": "convnextTiny-ocr-recognition"
+    },
+    "model": {
+        "type": "OCRRecognition",
+        "recognizer": "ConvNextViT",
+        "inference_kwargs": {
+            "img_height": 32,
+            "img_width": 804,
+            "do_chunking": true
+        }
+    },
+    "preprocessor": {
+        "type": "ocr-recognition"
+    },
+    "train": {
+        "max_epochs": 30,
+        "work_dir": "./work_dir",
+        "dataloader": {
+            "batch_size_per_gpu": 64,
+            "workers_per_gpu": 0
+        },
+        "optimizer": {
+            "type": "AdamW",
+            "weight_decay": 0.01,
+            "lr": 0.001,
+            "options": {
+                "grad_clip": {
+                    "max_norm": 20
+                }
+            }
+        },
+        "lr_scheduler": {
+            "type": "MultiStepLR",
+            "milestones": [
+                10,
+                20
+            ],
+            "gamma": 0.1
+        },
+        "hooks": [
+            {
+                "type": "IterTimerHook"
+            }
+        ],
+        "checkpoint": {
+            "period": {
+                "interval": 1,
+                "save_dir": "./work_dir"
+            }
+        },
+        "logging": {
+            "interval": 1000,
+            "out_dir": "./work_dir"
+        }
+    },
+    "evaluation": {
+        "dataloader": {
+            "batch_size_per_gpu": 32,
+            "workers_per_gpu": 0,
+            "shuffle": false
+        },
+        "metrics": "ocr-recognition-metric",
+        "period": {
+            "interval": 1
+        }
+    }
+}
