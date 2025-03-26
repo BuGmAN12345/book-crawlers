@@ -1074,7 +1074,6 @@ if __name__ == '__main__':
 		book_35=Get_Book_35(get_book_name,not args.noepub,not args.noproxies,args.pps,args.tn) #默认转化为epub，默认不适用代理
 		book_35.run()
 	else:
-		mypytesseract=importlib.import_module('pytesseract') #导入需要的模块
 		Images=getattr(importlib.import_module('PIL'),'Image')
 		pipeline=getattr(importlib.import_module('modelscope.pipelines'),'pipeline')
 		Tasks=getattr(importlib.import_module('modelscope.utils.constant'),'Tasks')
