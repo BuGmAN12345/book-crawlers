@@ -1076,6 +1076,8 @@ if __name__ == '__main__':
 	else:
 		mypytesseract=importlib.import_module('pytesseract') #导入需要的模块
 		Images=getattr(importlib.import_module('PIL'),'Image')
+		pipeline=getattr(importlib.import_module('modelscope.pipelines'),'pipeline')
+		Tasks=getattr(importlib.import_module('modelscope.utils.constant'),'Tasks')
 		np=importlib.import_module('numpy')
 		cv=importlib.import_module('cv2')
 		if args.dingdian:
