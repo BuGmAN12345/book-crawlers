@@ -96,8 +96,9 @@ class Get_Book:
 		#print("book crawlers is opened……")
 		self.book_name=book_name # input("Please enter the name of the book you want to crawl\n") 
 		self.whether_Proxies=whether_Proxies
+		self.proxies_pool_num=num
 		if proxy_pool==None: #并未传入指定代理池
-			self.init_proxies(num)
+			self.init_proxies()
 		else:
 			self.proxies_pool=proxy_pool
 		#self.headers=Header()
@@ -111,18 +112,18 @@ class Get_Book:
 		self.whether_epub=whether_epub
 		self.author=''
 
-	def init_proxies(self,num):
+	def init_proxies(self):
 		if self.whether_Proxies==True:
 			pp=Proxies_Pool()
-			self.proxies_pool=pp.get_Proxies(num) #获取代理池
+			self.proxies_pool=pp.get_Proxies(self.proxies_pool_num) #获取代理池
 
 	def proxies_request(self,target,method,data):  #运用代理下的请求处理，默认使用get方法
 		random_proxies=random.randint(0,len(self.proxies_pool)-1)
 		request_time=0
 		success=False
 		tmp=not host_agent #即默认使用SSL检验
-		while success==False:        
-			while True:
+		while success==False: #当代理不对时一直循环       
+			while True: #当请求不成功时一直循环
 				try:
 					ua=self.user_agent.rgua()
 					self.headers.perm_replace_header('User-Agent',ua)
@@ -140,7 +141,7 @@ class Get_Book:
 								sys.exit()
 							else:
 								#print("sleep! in",target)
-								time.sleep(5)
+								time.sleep(2^request_time) #动态调整休息时间
 					else:
 						with requests.post(url=target,headers=self.headers.get_header(),data=data,proxies={"http":self.proxies_pool[random_proxies]},timeout=5,verify=tmp) as req:
 							if req.history: #如果出现重定位，则自动修正url
@@ -154,21 +155,28 @@ class Get_Book:
 								print("-"*20,"network erro!","-"*20)
 								sys.exit()
 							else:
-								time.sleep(5)
+								time.sleep(2^request_time)
 					request_time+=1
 					self.sleep_time+=1
 				except requests.exceptions.Timeout:  #如果代理不可用
 					del self.proxies_pool[random_proxies]
+					if not self.proxies_pool:
+						print("Proxy resource exhausted. Re-pulling……")
+						self.init_proxies(self.proxies_pool_num)
 					random_proxies=random.randint(0,len(self.proxies_pool)-1)
 
 	def request(self,target,method,data):
 		request_time=0
 		tmp=not host_agent #即默认使用SSL检验
+		'''proxies = {
+	    'http': 'http://127.0.0.1:8080',
+	    'https': 'http://127.0.0.1:8080'
+	    }'''
 		while True:
 			ua=self.user_agent.rgua()
 			self.headers.perm_replace_header('User-Agent',ua)
 			if method==False:
-				with requests.get(url=target,headers=self.headers.get_header(),verify=tmp,timeout=5) as req:
+				with requests.get(url=target,headers=self.headers.get_header(),verify=tmp,timeout=5) as req: #proxies=proxies,
 					if req.history: #如果出现重定位，则自动修正url
 						self.server=req.url.rsplit('/', 1)[0]+'/'
 						print('server has changed into ',self.server)
@@ -179,9 +187,9 @@ class Get_Book:
 						print("-"*20,"network erro!","-"*20)
 						sys.exit()
 					else:
-						time.sleep(5)
+						time.sleep(2^request_time)
 			else:
-				with requests.post(url=target,data=data,headers=self.headers.get_header(),verify=tmp,timeout=5) as req:
+				with requests.post(url=target,data=data,headers=self.headers.get_header(),verify=tmp,timeout=5) as req: #,proxies=proxies
 					if req.history: #如果出现重定位，则自动修正url
 						self.server=req.url.rsplit('/', 1)[0]+'/'
 						print('server has changed into ',self.server)
@@ -192,7 +200,7 @@ class Get_Book:
 						print("-"*20,"network erro!","-"*20)
 						sys.exit()
 					else:
-						time.sleep(5)
+						time.sleep(2^request_time)
 			request_time+=1
 			self.sleep_time+=1
 
@@ -517,30 +525,31 @@ class Get_Book_35(Get_Book):
 	
 
 class Get_Book_dingdian(Get_Book):
-	def __init__(self,book_name,whether_epub,whether_Proxies,whether_register,num,thread_num,proxy_pool=None): #是否使用代理，代理池大小
+	def __init__(self,book_name,whether_epub,whether_Proxies,whether_register,num,thread_num,whether_cookie,proxy_pool=None): #是否使用代理，代理池大小
 		super().__init__(book_name,whether_epub,whether_Proxies,num,thread_num,proxy_pool)
 		self.server="https://www.txt263.com" #www.023zw.com
 		tmp={
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0",
-		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
+		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
+		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 		"Accept-Language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
 		"Accept-Encoding": "gzip, deflate",
 		"Upgrade-Insecure-Requests": "1",
 		"Sec-Fetch-Dest": "document",
 		"Sec-Fetch-Mode": "navigate",
-		"Sec-Fetch-Site": "none",
+		"Sec-Fetch-Site": "same-origin",
 		"Sec-Fetch-User": "?1",
 		"Priority": "u=0, i",
 		"Te": "trailers",
-		"Connection": "close"
 		}  #目标的请求头，用来说明服务器使用的附加信息
 		self.headers=Header(tmp)
 		self.content_tag="word_read"
 		self.picture_tag='imgbox'
 		self.chapter_num=None
 		self.whether_register=whether_register
-		model_small = r"ocr-captcha/output_small"
-		self.ocr_recognition_small = pipeline(Tasks.ocr_recognition, model=model_small)
+		self.whether_cookie=whether_cookie
+		if self.whether_cookie:
+			model_small = r"ocr-captcha/output_small"
+			self.ocr_recognition_small = pipeline(Tasks.ocr_recognition, model=model_small)
 
 	def download_image(self,url,path,header=None): #重写加入headers
 		try:
@@ -941,12 +950,11 @@ class Get_Book_dingdian(Get_Book):
 
 	def main_login(self): #负责获得cookie 
 		cookie=None
-		for i in range(1):
+		for i in range(3):
 			if self.whether_register==True:
 				cookie=self.register()
 			else:
 				cookie=self.log_in()
-			print(cookie)
 			if cookie!=None:
 				break
 		else:
@@ -956,7 +964,8 @@ class Get_Book_dingdian(Get_Book):
 		self.headers.perm_add_header('Cookie',cookie)
 
 	def run(self):  #主程序
-		self.main_login()
+		if self.whether_cookie==True:
+			self.main_login()
 		books_name,books_url=self.search_book()
 		if len(books_name)==0:
 			print("sorry,the book can't be found in dingdian net!")
@@ -969,10 +978,11 @@ def input_bookname():
 	get_book_name=input("Please enter the name of the book you want to crawl\n")
 	return get_book_name
 
-def get_book_main(book_name,whether_epub,whether_Proxies,whether_register,num,thread_num):
+def get_book_main(book_name,whether_epub,whether_Proxies,whether_register,num,thread_num,whether_cookie):
 	book_35=Get_Book_35(book_name,whether_epub,whether_Proxies,num,thread_num)
-	book_dingdian=Get_Book_dingdian(book_name,whether_epub,whether_Proxies,whether_register,num,thread_num,book_35.proxies_pool)
-	book_dingdian.main_login()
+	book_dingdian=Get_Book_dingdian(book_name,whether_epub,whether_Proxies,whether_register,num,thread_num,whether_cookie,book_35.proxies_pool)
+	if whether_cookie==True:
+		book_dingdian.main_login()
 	books_name_35,books_url_35=book_35.search_book()
 	books_name_dingdian,books_url_dingdian=book_dingdian.search_book()
 	website=None
@@ -1049,6 +1059,9 @@ def get_book_main(book_name,whether_epub,whether_Proxies,whether_register,num,th
 
 def validate_single_option(args):
 	# 计算被传入的选项数量
+	if args.getcookie==False and args.dlogin==True:
+		print("Erro: If you have chosen not to use cookies, then there is no need to log in or sign up!")
+		sys.exit()
 	options = [args.n35, args.dingdian, args.compuse]
 	num_selected = sum(1 for option in options if option is True)
 	if num_selected>1:
@@ -1056,15 +1069,16 @@ def validate_single_option(args):
 		sys.exit()
 
 if __name__ == '__main__':
-	parser=argparse.ArgumentParser(description="This is a teaching interface")
-	parser.add_argument("-noepub",default=False,action="store_true",help="Not outputting books in EPUB format(output in txt format)")
-	parser.add_argument("-noproxies",default=False,action="store_true",help="Not using proxy to crawl books(Default not to use proxy)")
+	parser=argparse.ArgumentParser(description="This is a teaching interface\n")
+	parser.add_argument("--noepub",default=False,action="store_true",help="Not outputting books in EPUB format(output in txt format)")
+	parser.add_argument("--noproxies",default=False,action="store_true",help="Not using proxy to crawl books(Default not to use proxy)")
 	parser.add_argument("--pps",type=int,default=30,help="Input a int number as the size of proxies pool(Default is 30)")
 	parser.add_argument("--tn",type=int,default=168,help="Input a int number as the number of threads(Default is 168)")
 	parser.add_argument("--n35",default=False,action="store_true",help="Using only 35 Novel Network to crawl books")
 	parser.add_argument("--dingdian",default=False,action="store_true",help="Using only DingDian Novel Network to crawl books")
 	parser.add_argument("--compuse",default=False,action="store_true",help="Simultaneously use DingDian Novel Network and 35 Novel Network to obtain books for you to choose from")
 	parser.add_argument("--dlogin",default=False,action="store_true",help="Log in directly through default accounts instead of registering a new account (note: there may be a risk of account suspension)")
+	parser.add_argument("--getcookie",default=False,action="store_true",help="Due to the problems with the login interface of dingdian, it is not necessary to use the login for the time being, please try not to use this parameter")
 	args=parser.parse_args()
 	validate_single_option(args) #判断是否出错
 	if args.n35:
@@ -1074,19 +1088,21 @@ if __name__ == '__main__':
 		book_35=Get_Book_35(get_book_name,not args.noepub,not args.noproxies,args.pps,args.tn) #默认转化为epub，默认不适用代理
 		book_35.run()
 	else:
-		Images=getattr(importlib.import_module('PIL'),'Image')
+		Images=getattr(importlib.import_module('PIL.Image'),'Image')
 		pipeline=getattr(importlib.import_module('modelscope.pipelines'),'pipeline')
 		Tasks=getattr(importlib.import_module('modelscope.utils.constant'),'Tasks')
 		np=importlib.import_module('numpy')
 		cv=importlib.import_module('cv2')
 		if args.dingdian:
 			get_book_name=input_bookname()
-			book_dingdian=Get_Book_dingdian(get_book_name,not args.noepub,not args.noproxies,not args.dlogin,args.pps,args.tn)
+			book_dingdian=Get_Book_dingdian(get_book_name,not args.noepub,not args.noproxies,not args.dlogin,args.pps,args.tn,args.getcookie)
 			book_dingdian.run()
 		else:
 			get_book_name=input_bookname()
-			get_book_main(get_book_name,not args.noepub,not args.noproxies,not args.dlogin,args.pps,args.tn)
+			get_book_main(get_book_name,not args.noepub,not args.noproxies,not args.dlogin,args.pps,args.tn,args.getcookie)
 	
+
+
 
 
 	'''mypytesseract=importlib.import_module('pytesseract') #导入需要的模块
