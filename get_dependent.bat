@@ -21,3 +21,7 @@ pip install EbookLib
 pip install requests
 ::wget
 pip install wget
+::PIL
+pip install Pillow
+::modelscope.pipelines
+pip install modelscope
