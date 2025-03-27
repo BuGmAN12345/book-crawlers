@@ -59,17 +59,3 @@ if __name__ == '__main__':
 		else:
 			get_book_name=input_bookname()
 			get_book_main(get_book_name,not args.noepub,not args.noproxies,not args.dlogin,args.pps,args.tn,args.getcookie)
-	
-
-
-
-
-	'''mypytesseract=importlib.import_module('pytesseract') #导入需要的模块
-	Images=getattr(importlib.import_module('PIL'),'Image')
-	np=importlib.import_module('numpy')
-	cv=importlib.import_module('cv2')
-	book_dingdian=Get_Book_dingdian("斗罗大陆",False,False,True,1,1)
-	impath=basic_path+'\\code{}.jpg'.format(0)
-	new_header=book_dingdian.headers.temp_add_header("authority",'www.txt263.com')
-	book_dingdian.download_image(book_dingdian.server+"/code.jpg?"+str(random.random()),impath,new_header)
-	print(book_dingdian.ver_code(impath,True))'''
