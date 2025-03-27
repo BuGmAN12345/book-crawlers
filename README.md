@@ -1,6 +1,6 @@
 # book-crawlers
 ## 中文版：
-### 很遗憾的是，顶点小说网平台维护出现问题，导致登录无法使用，暂时只能使用35小说网内容
+### 暂时修复无法登录的问题，临时跳过了登录模块，并将默认值设置为不登陆
 版本更新：
 
 1.1：
@@ -118,7 +118,7 @@ options:
 
 
 ## English version
-### Unfortunately, there is a maintenance issue with the Vertex Novel Network platform, which has resulted in login failure and currently only 35 Novel Network content can be used
+### Temporary fix for not being able to log in, temporarily skipped the login module and set the default to no login
 Version update:
 
 1.1：  
